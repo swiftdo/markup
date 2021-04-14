@@ -29,8 +29,11 @@ extension Character {
 // tokenization\parsing\rendering
 
 enum MarkupToken: CustomStringConvertible {
+    /// 内容
     case text(String)
+    /// 左边定界符
     case leftDelimiter(Character)
+    /// 右边定界符
     case rightDelimiter(Character)
     
     var description: String {
@@ -226,9 +229,7 @@ struct MarkupParser {
     }
     
     private mutating func close(delimiter: Character, elements: [MarkupNode]) -> MarkupNode? {
-        
         var newElements = elements
-        
         while openDelimiters.count > 0 {
             let openingDelimiter = openDelimiters.popLast()!
             if openingDelimiter == delimiter {
