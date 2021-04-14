@@ -27,6 +27,7 @@ extension Character {
 }
 
 // tokenization\parsing\rendering
+
 enum MarkupToken: CustomStringConvertible {
     case text(String)
     case leftDelimiter(Character)
@@ -46,9 +47,9 @@ enum MarkupToken: CustomStringConvertible {
 
 enum MarkupNode {
     case text(String)
-    case strong([MarkupNode])
-    case emphasis([MarkupNode])
-    case delete([MarkupNode])
+    case strong([MarkupNode]) // 粗体
+    case emphasis([MarkupNode]) // 斜体
+    case delete([MarkupNode]) // 删除
     
     init?(delimiter: Character, children: [MarkupNode]) {
         switch delimiter {
@@ -96,17 +97,20 @@ struct MarkupTokenizer {
         return token
     }
     
+    /// 当前字符
     private var current: Character? {
         guard currentIndex < input.endIndex else {return nil}
         return input[currentIndex]
     }
     
+    /// 上一个字符
     private var previous: Character? {
         guard currentIndex > input.startIndex else {return nil}
         let index = input.index(before: currentIndex)
         return input[index]
     }
     
+    /// 下一个字符
     private var next: Character? {
         guard currentIndex < input.endIndex else {return nil}
         let index = input.index(after: currentIndex)
@@ -114,10 +118,12 @@ struct MarkupTokenizer {
         return input[index]
     }
     
+    /// 扫描
     private mutating func scan(delimiter: Character) -> MarkupToken? {
-        return scanRight(delimiter: delimiter) ?? scanRight(delimiter: delimiter)
+        return scanLeft(delimiter: delimiter) ?? scanRight(delimiter: delimiter)
     }
     
+    /// 扫描左边
     private mutating func scanLeft(delimiter: Character) -> MarkupToken? {
         let p = previous ?? .space
         
@@ -136,7 +142,7 @@ struct MarkupTokenizer {
         return .leftDelimiter(delimiter)
     }
     
-    
+    /// 扫描右边
     private mutating func scanRight(delimiter: Character) -> MarkupToken? {
         guard let p = previous else {return nil}
         let n = next ?? .space
@@ -154,6 +160,7 @@ struct MarkupTokenizer {
         return .rightDelimiter(delimiter)
     }
     
+    /// 扫描文本
     private mutating func scanText() -> MarkupToken? {
         let startIndex = currentIndex
         scanUntil { CharacterSet.delimiters.contains(of: $0) }
@@ -164,13 +171,14 @@ struct MarkupTokenizer {
         return .text(String(input[startIndex..<currentIndex]))
     }
     
-    
+    /// 扫描直到
     private mutating func scanUntil(_ predicate:(Character) -> Bool) {
         while currentIndex < input.endIndex && !predicate(input[currentIndex]) {
             advance()
         }
     }
     
+    /// 移动下标
     private mutating func advance() {
         currentIndex = input.index(after: currentIndex)
     }
