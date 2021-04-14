@@ -10,8 +10,8 @@ import Foundation
 private extension CharacterSet {
     static let delimiters = CharacterSet(charactersIn: "*_~")
     
-    static let whitespaceAndPunctuation = CharacterSet.whitespacesAndNewlines
-        .union(CharacterSet.punctuationCharacters)
+    static let whitespaceAndPunctuation = CharacterSet.whitespacesAndNewlines // 空白与换行
+        .union(CharacterSet.punctuationCharacters) // 标点的字符集
         .union(CharacterSet(charactersIn: "~"))
 
     func contains(of character: Character) -> Bool {
@@ -68,7 +68,9 @@ enum MarkupNode {
     }
 }
 
+/// 分词
 struct MarkupTokenizer {
+    
     private let input: String
     
     private var currentIndex: String.Index
@@ -87,9 +89,12 @@ struct MarkupTokenizer {
         }
         
         var token: MarkupToken?
+        
+        /// 包含分界符
         if CharacterSet.delimiters.contains(of: c) {
             token = scan(delimiter: c)
         } else {
+            /// 读取文本直到遇到分界符
             token = scanText()
         }
         
@@ -134,6 +139,7 @@ struct MarkupTokenizer {
             return nil
         }
         
+        // 
         guard CharacterSet.whitespaceAndPunctuation.contains(of: p) &&
                 !CharacterSet.whitespacesAndNewlines.contains(of: n) &&
                 !leftDelimiters.contains(delimiter) else {
@@ -150,7 +156,9 @@ struct MarkupTokenizer {
         guard let p = previous else {return nil}
         let n = next ?? .space
         
-        guard !CharacterSet.whitespacesAndNewlines.contains(of: p) && CharacterSet.whitespaceAndPunctuation.contains(of: n) && leftDelimiters.contains(delimiter) else {
+        guard !CharacterSet.whitespacesAndNewlines.contains(of: p) &&
+                CharacterSet.whitespaceAndPunctuation.contains(of: n) &&
+                leftDelimiters.contains(delimiter) else {
             return nil
         }
         
@@ -187,7 +195,7 @@ struct MarkupTokenizer {
     }
 }
 
-
+//
 struct MarkupParser {
     private var tokenizer: MarkupTokenizer
     private var openDelimiters: [Character] = []
